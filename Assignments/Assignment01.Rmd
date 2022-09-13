@@ -1,0 +1,20 @@
+---
+title: "Assignment01"
+author: "Jacob Freedman"
+date: "2022-09-10"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### My Git settings:
+user.name=jacobfreedman
+user.email=jacob.freedman1@gmail.com
+
+### My Git remote settings:
+
+
+
+
