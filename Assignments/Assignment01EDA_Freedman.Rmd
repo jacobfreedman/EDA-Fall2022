@@ -1,0 +1,29 @@
+---
+title: "Assignment01"
+author: "Jacob Freedman"
+date: "2022-09-10"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### My Git settings:
+user.name=jacobfreedman
+user.email=jacob.freedman1@gmail.com
+
+### My Git remote settings:
+origin  https://github.com/jacobfreedman/EDA-Fall2022 (fetch)
+origin  https://github.com/jacobfreedman/EDA-Fall2022 (push)
+upstream        https://github.com/ENV872/EDA-Fall2022 (fetch)
+upstream        DISABLE (push)
+
+### My Git changes:
+85ce7df (HEAD -> main, origin/main, origin/HEAD) Merge branch 'main' of https://github.com/ENV872/EDA-Fall2022
+d43cf37 assn 1 work now?
+f03c443 assignment 1 commit
+b94f9ee (upstream/main) uploaded Lab2 file
+f1d2056 Added assignment to git account
+b45a87d does it work now
+d98ad1d added to repo
