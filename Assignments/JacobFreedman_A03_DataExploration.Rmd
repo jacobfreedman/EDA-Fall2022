@@ -3,8 +3,6 @@ title: "Assignment 3: Data Exploration"
 author: "Student Name"
 output: pdf_document
 geometry: margin=2.54cm
-editor_options: 
-  chunk_output_type: console
 ---
 
 ## OVERVIEW
@@ -27,88 +25,83 @@ The completed exercise is due on Sept 30th.
 1.  Check your working directory, load necessary packages (tidyverse), and upload two datasets: the ECOTOX neonicotinoid dataset (ECOTOX_Neonicotinoids_Insects_raw.csv) and the Niwot Ridge NEON dataset for litter and woody debris (NEON_NIWO_Litter_massdata_2018-08_raw.csv). Name these datasets "Neonics" and "Litter", respectively. Be sure to include the subcommand to read strings in as factors.
 
 ```{r,  message = FALSE}
-Neonics <- read.csv("~/R/EDA-Fall2022/Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv", stringsAsFactors = TRUE)
-Litter <- read.csv("~/R/EDA-Fall2022/Data/Raw/NEON_NIWO_Litter_massdata_2018-08_raw.csv", stringsAsFactors = TRUE)
+
 ```
 
 ## Learn about your system
 
 2.  The neonicotinoid dataset was collected from the Environmental Protection Agency's ECOTOX Knowledgebase, a database for ecotoxicology research. Neonicotinoids are a class of insecticides used widely in agriculture. The dataset that has been pulled includes all studies published on insects. Why might we be interested in the ecotoxicology of neonicotinoids on insects? Feel free to do a brief internet search if you feel you need more background information.
 
-> #Answer: If we are using neonicotinoids as insectisides, it would be valuable to know their effects on insects. We would want to know the effectiveness of certain compounds, the time required to cause mortality, or other characteristics of a given chemical. We also would want to know whether a chemical would impact non-target species, such as bees, which could act as valuable pollinators.
+> Answer:
 
 3.  The Niwot Ridge litter and woody debris dataset was collected from the National Ecological Observatory Network, which collectively includes 81 aquatic and terrestrial sites across 20 ecoclimatic domains. 32 of these sites sample forest litter and woody debris, and we will focus on the Niwot Ridge long-term ecological research (LTER) station in Colorado. Why might we be interested in studying litter and woody debris that falls to the ground in forests? Feel free to do a brief internet search if you feel you need more background information.
 
-> #Answer: Fun fact, I worked for NEON at Niwot Ridge for two seasons in 2019 and 2020 and collected some of this data (though I was really on the animal team and did more work with beetles). Quantifying and categorzing litter is important for many reasons. The type of litter can impact the acidity of the soil (pine needles) and change the area's vulnerability to fire. Different amounts/forms of litter might also impact the insect and small mammal communities that live in the area.
+> Answer:
 
 4.  How is litter and woody debris sampled as part of the NEON network? Read the NEON_Litterfall_UserGuide.pdf document to learn more. List three pieces of salient information about the sampling methods here:
 
-> #Answer: 1. There are both elevated and ground level litter traps. 2. Litter is sorted into functional group before being weighed. 3. The weight is a dry mass, not a wet field mass.
+> Answer: 
+ 1.
+ 2.
+ 3. 
 
 ## Obtain basic summaries of your data (Neonics)
 
 5.  What are the dimensions of the dataset?
 
 ```{r}
-dim(Neonics)
-dim(Litter)
 
-#Neonics is 4623 rows and 30 columns. Litter is 188 rows and 19 columns. 
 ```
 
 6.  Using the `summary` function on the "Effect" column, determine the most common effects that are studied. Why might these effects specifically be of interest?
 
 ```{r}
-summary(Neonics$Effect)
+
 ```
 
-> Answer: The most common effects are Population (1803) and Mortality (1493), which comprise the majority of the total observations. Population is of interest because companies may be interested in understanding how the chemical impacts the numbers of a large population of insects, even if it doesn't result in direct or immediate mortality. In turn, they may be interested in mortality to assess the direct impact of the chemical on an individual organism.
+> Answer:
 
 7.  Using the `summary` function, determine the six most commonly studied species in the dataset (common name). What do these species have in common, and why might they be of interest over other insects? Feel free to do a brief internet search for more information if needed.
 
 ```{r}
-summary(Neonics$Species.Common.Name)
+
 ```
 
-> Answer: The 6 most commonly studied species are the Honey Bee (667), Parasitic Wasp (285), Buff Tailed Bumblebee (183), Carniolan Honey Bee (152), Bumble Bee (140), and the Italian Honeybee (113). These are likely the most studied because they are non-target organisms that companies wish the pesticides to NOT adversely impact. All of the bee species are important pollinators and parasitic wasps are crucial for eliminating certain pests.
+> Answer:
 
 8.  Concentrations are always a numeric value. What is the class of Conc.1..Author. in the dataset, and why is it not numeric?
 
 ```{r}
-class(Neonics$Conc.1..Author.)
+
 ```
 
-> Answer: It is a factor because the data stored in the columns are not all numbers. They have additional symbols that make it impossible for r to determine the class as numeric. For example, the concentration values are sometimes expressed as "\>###" (greater than a given value) or are written as "###/". This may mean that only a certain number of significant figures were used and the value is approximate, but I could not find more information in the Code Appendix.
+> Answer:
 
 ## Explore your data graphically (Neonics)
 
 9.  Using `geom_freqpoly`, generate a plot of the number of studies conducted by publication year.
 
 ```{r}
-ggplot(Neonics, aes(x = Publication.Year)) +
-  geom_freqpoly()
+
 ```
 
 10. Reproduce the same graph but now add a color aesthetic so that different Test.Location are displayed as different colors.
 
 ```{r}
-ggplot(Neonics, aes(Publication.Year, after_stat(count), colour = Test.Location)) +
-  geom_freqpoly()
+
 ```
 
 Interpret this graph. What are the most common test locations, and do they differ over time?
 
-> Answer: The vast majority of test locations are in the lab or in a natural field setting. The number of tests in these two locations were relatively similar from 1990 until 2010. However, after 2010, the number field tests fell dramatically and lab tests became the dominant method. 
+> Answer:
 
 11. Create a bar graph of Endpoint counts. What are the two most common end points, and how are they defined? Consult the ECOTOX_CodeAppendix for more information.
 
 ```{r}
-ggplot(Neonics, aes(x = Endpoint)) +
-  geom_bar() +
-  theme(axis.text=element_text(size=4))
+
 ```
 
-> Answer:The two most common Endpoints are LOEL and NOEL (In order to visualize these on the bar graph I had to reduce the size of the axis labels). LOEL is defined as the lowest concentration of a chemical producing effects that were significantly different than the effects of the controls. NOEL is defined as the highest concentration of a chemical producing effects that were NOT significantly different than the effects of the controls. Thus, LOEL and NOEL values should be pretty similar. 
+> Answer:
 
 ## Explore your data (Litter)
 
