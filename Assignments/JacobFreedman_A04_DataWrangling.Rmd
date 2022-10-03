@@ -67,14 +67,20 @@ EPA.Ozone.NC.2019$Date <- as.Date(EPA.Ozone.NC.2019$Date, format = "%m/%d/%Y")
 EPA.PM25.NC.2018$Date <- as.Date(EPA.PM25.NC.2018$Date, format = "%m/%d/%Y")
 EPA.PM25.NC.2019$Date <- as.Date(EPA.PM25.NC.2019$Date, format = "%m/%d/%Y")
 
-#4
+#4 Selecting for only the desired columns and saving in a new dataframe.
 EPA.Ozone.NC.2018.Refined <- select(EPA.Ozone.NC.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 EPA.Ozone.NC.2019.Refined <- select(EPA.Ozone.NC.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 EPA.PM25.NC.2018.Refined <- select(EPA.PM25.NC.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 EPA.PM25.NC.2019.Refined <- select(EPA.PM25.NC.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
-#5
+#5 Replacing all values in AQS_PARAMETER_DESC column with the value "PM2.5"
+EPA.PM25.NC.2018.Refined$AQS_PARAMETER_DESC <- c("PM2.5")
+EPA.PM25.NC.2019.Refined$AQS_PARAMETER_DESC <- c("PM2.5")
 
-#6
+#6 Exporting the new dataframes into the Processed Data folder
+write.csv(EPA.Ozone.NC.2018.Refined, file = "./Data/Processed/EPAair_O3_NC2018_Processed.csv", row.names=FALSE)
+write.csv(EPA.Ozone.NC.2019.Refined, file = "./Data/Processed/EPAair_O3_NC2019_Processed.csv", row.names=FALSE)
+write.csv(EPA.PM25.NC.2018.Refined, file = "./Data/Processed/EPAair_PM25_NC2018_Processed.csv", row.names=FALSE)
+write.csv(EPA.PM25.NC.2019.Refined, file = "./Data/Processed/EPAair_PM25_NC2019_Processed.csv", row.names=FALSE)
 
 ```
 
@@ -93,10 +99,15 @@ EPA.PM25.NC.2019.Refined <- select(EPA.PM25.NC.2019, Date, DAILY_AQI_VALUE, Site
 11. Save your processed dataset with the following file name: "EPAair_O3_PM25_NC1718_Processed.csv"
 
 ```{r}
-#7
-
+#7 Combining 4 refined datasets into one data frame.
+EPA.NC.TOTAL <- rbind(EPA.Ozone.NC.2018.Refined, EPA.Ozone.NC.2019.Refined, EPA.PM25.NC.2018.Refined, EPA.PM25.NC.2019.Refined)
 #8
-
+EPA.NC.TOTAL.SelectedSites <- 
+  EPA.NC.TOTAL %>%
+  filter(Site.Name == "Linville Falls" | Site.Name == "Durham Armory" | Site.Name == "Leggett" | Site.Name == "Hattie Avenue" | Site.Name == "Clemmons Middle" | Site.Name == "Mendenhall School" | Site.Name == "Frying Pan Mountain" | Site.Name == "West Johnston Co." | Site.Name == "Garinger High School" | Site.Name == "Castle Hayne" | Site.Name == "Pitt Agri. Center" | Site.Name == "Bryson City" | Site.Name == "Millbrook School")
+Month <- month(EPA.NC.TOTAL.SelectedSites$Date)
+Year <- year(EPA.NC.TOTAL.SelectedSites$Date)
+EPA.NC.TOTAL.SelectedSites <- cbind(EPA.NC.TOTAL.SelectedSites, Month, Year)
 #9
 
 #10
