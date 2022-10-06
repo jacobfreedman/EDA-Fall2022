@@ -35,22 +35,31 @@ The completed exercise is due on Friday, Oct7th @ 5:00pm.
 
 ```{r, message = FALSE}
 #1 Loading packages and loading in 4 EPA raw datasets
+
 library(tidyverse)
 library(lubridate)
+
 EPA.Ozone.NC.2018 <- read.csv("./Data/Raw/EPAair_O3_NC2018_raw.csv", stringsAsFactors = TRUE)
 EPA.Ozone.NC.2019 <- read.csv("./Data/Raw/EPAair_O3_NC2019_raw.csv", stringsAsFactors = TRUE)
 EPA.PM25.NC.2018 <- read.csv("./Data/Raw/EPAair_PM25_NC2018_raw.csv", stringsAsFactors = TRUE)
 EPA.PM25.NC.2019 <- read.csv("./Data/Raw/EPAair_PM25_NC2019_raw.csv", stringsAsFactors = TRUE)
 
-#2 Looking at dimensions and column names of 4 datasets. There are many other functions to use, such as "head" or "tail", but that results in a large total output.  
+#2 Looking at dimensions, column names, and structure of 4 datasets.
+
 dim(EPA.Ozone.NC.2018)
 dim(EPA.Ozone.NC.2019)
 dim(EPA.PM25.NC.2018)
 dim(EPA.PM25.NC.2019)
+
 colnames(EPA.Ozone.NC.2018)
 colnames(EPA.Ozone.NC.2019)
 colnames(EPA.PM25.NC.2018)
 colnames(EPA.PM25.NC.2019)
+
+str(EPA.Ozone.NC.2018)
+str(EPA.Ozone.NC.2019)
+str(EPA.PM25.NC.2018)
+str(EPA.PM25.NC.2019)
 ```
 
 ## Wrangle individual datasets to create processed files.
@@ -68,15 +77,25 @@ EPA.PM25.NC.2018$Date <- as.Date(EPA.PM25.NC.2018$Date, format = "%m/%d/%Y")
 EPA.PM25.NC.2019$Date <- as.Date(EPA.PM25.NC.2019$Date, format = "%m/%d/%Y")
 
 #4 Selecting for only the desired columns and saving in a new dataframe.
+
 EPA.Ozone.NC.2018.Refined <- select(EPA.Ozone.NC.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 EPA.Ozone.NC.2019.Refined <- select(EPA.Ozone.NC.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 EPA.PM25.NC.2018.Refined <- select(EPA.PM25.NC.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 EPA.PM25.NC.2019.Refined <- select(EPA.PM25.NC.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+
 #5 Replacing all values in AQS_PARAMETER_DESC column with the value "PM2.5"
+
 EPA.PM25.NC.2018.Refined$AQS_PARAMETER_DESC <- c("PM2.5")
 EPA.PM25.NC.2019.Refined$AQS_PARAMETER_DESC <- c("PM2.5")
 
+#Verifying dimensions of the dataframes.
+dim(EPA.Ozone.NC.2018.Refined) 
+dim(EPA.Ozone.NC.2019.Refined)
+dim(EPA.PM25.NC.2018.Refined)
+dim(EPA.PM25.NC.2019.Refined)
+
 #6 Exporting the new dataframes into the Processed Data folder
+
 write.csv(EPA.Ozone.NC.2018.Refined, file = "./Data/Processed/EPAair_O3_NC2018_Processed.csv", row.names=FALSE)
 write.csv(EPA.Ozone.NC.2019.Refined, file = "./Data/Processed/EPAair_O3_NC2019_Processed.csv", row.names=FALSE)
 write.csv(EPA.PM25.NC.2018.Refined, file = "./Data/Processed/EPAair_PM25_NC2018_Processed.csv", row.names=FALSE)
@@ -96,24 +115,36 @@ write.csv(EPA.PM25.NC.2019.Refined, file = "./Data/Processed/EPAair_PM25_NC2019_
 
 9. Spread your datasets such that AQI values for ozone and PM2.5 are in separate columns. Each location on a specific date should now occupy only one row.
 10. Call up the dimensions of your new tidy dataset.
-11. Save your processed dataset with the following file name: "EPAair_O3_PM25_NC1718_Processed.csv"
+11. Save your processed dataset with the following file name: "EPAair_O3_PM25_NC1718_Processed.csv" #I am assuming this should be 18/19?
 
 ```{r}
 #7 Combining 4 refined datasets into one data frame.
 EPA.NC.TOTAL <- rbind(EPA.Ozone.NC.2018.Refined, EPA.Ozone.NC.2019.Refined, EPA.PM25.NC.2018.Refined, EPA.PM25.NC.2019.Refined)
-#8
+
+dim(EPA.NC.TOTAL)
+
+#8 Selecting data for certain sites, grouping by multiple parameters. Then taking mean AQI values to ensure one row represents one day for one site. Also adding month and year columns.
 EPA.NC.TOTAL.SelectedSites <- 
-  EPA.NC.TOTAL %>%
-  filter(Site.Name == "Linville Falls" | Site.Name == "Durham Armory" | Site.Name == "Leggett" | Site.Name == "Hattie Avenue" | Site.Name == "Clemmons Middle" | Site.Name == "Mendenhall School" | Site.Name == "Frying Pan Mountain" | Site.Name == "West Johnston Co." | Site.Name == "Garinger High School" | Site.Name == "Castle Hayne" | Site.Name == "Pitt Agri. Center" | Site.Name == "Bryson City" | Site.Name == "Millbrook School")
-Month <- month(EPA.NC.TOTAL.SelectedSites$Date)
-Year <- year(EPA.NC.TOTAL.SelectedSites$Date)
-EPA.NC.TOTAL.SelectedSites <- cbind(EPA.NC.TOTAL.SelectedSites, Month, Year)
-#9
+  EPA.NC.TOTAL %>% 
+  filter(Site.Name == "Linville Falls" | Site.Name == "Durham Armory" | Site.Name == "Leggett" | Site.Name == "Hattie Avenue" | Site.Name == "Clemmons Middle" | Site.Name == "Mendenhall School" | Site.Name == "Frying Pan Mountain" | Site.Name == "West Johnston Co." | Site.Name == "Garinger High School" | Site.Name == "Castle Hayne" | Site.Name == "Pitt Agri. Center" | Site.Name == "Bryson City" | Site.Name == "Millbrook School") %>%
+  group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY) %>%
+  summarise(meanAQI = mean(DAILY_AQI_VALUE),
+            meanLAT = mean(SITE_LATITUDE),
+            meanLONG = mean(SITE_LONGITUDE)) %>%
+  mutate(Month = month(Date)) %>%
+  mutate(Year = year(Date))
 
-#10
+dim(EPA.NC.TOTAL.SelectedSites) #Verifying dimensions of new data frame.
 
-#11
+#9 Splitting Ozone and PM2.5 values using the pivot_wider function.
+EPA.NC.TOTAL.SelectedSites.Spread <-
+  pivot_wider(EPA.NC.TOTAL.SelectedSites, names_from = AQS_PARAMETER_DESC, values_from = meanAQI)
 
+#10 Displaying dataframe dimensions.
+dim(EPA.NC.TOTAL.SelectedSites.Spread)
+
+#11 Saving the processed file. 
+write.csv(EPA.NC.TOTAL.SelectedSites.Spread, file = "./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv", row.names=FALSE)
 ```
 
 
@@ -123,14 +154,18 @@ EPA.NC.TOTAL.SelectedSites <- cbind(EPA.NC.TOTAL.SelectedSites, Month, Year)
 13. Call up the dimensions of the summary dataset.
 
 ```{r}
-#12a
+#12 Creating a summary data frame grouped by site, month, and year. Removing any rows with NA for Ozone or PM2.5 values.
+EPA.NC.TOTAL.Summary <- 
+  EPA.NC.TOTAL.SelectedSites.Spread %>% 
+  group_by(Site.Name, Month, Year) %>%
+  summarise(meanOZONE = mean(Ozone),
+            meanPM2.5 = mean(PM2.5)) %>%
+  drop_na(meanOZONE, meanPM2.5)
 
-#12b
-
-#13
-
+#13 Displaying dimensions of new dataframe.
+dim(EPA.NC.TOTAL.Summary)
 ```
 
 14. Why did we use the function `drop_na` rather than `na.omit`?
 
-> Answer: 
+> Answer: drop_na allows us to remove rows with NAs in specific columns, while na.omit is only able to remove rows with NAs in any column. For example, if we wanted to only remove rows with NAs in Ozone, we could not use na.omit because it would also remove rows with NAs in PM2.5
