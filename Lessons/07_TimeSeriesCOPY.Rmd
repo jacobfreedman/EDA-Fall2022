@@ -29,6 +29,7 @@ library(zoo)
 library(Kendall)
 #install.packages("tseries")
 library(tseries)
+library(ggplot2)
 
 # Set theme
 mytheme <- theme_classic(base_size = 14) +
