@@ -78,6 +78,8 @@ st_crs(epa_pm25_sites_sf)$epsg
 #Plot the data
 ggplot(data=epa_pm25_sites_sf) +
   geom_sf()
+
+mapview(epa_pm25_sites_sf)
 ```
 
 ## 2.2 Reading shapefiles into R with `sf`
@@ -93,6 +95,7 @@ Below we read in the USA counties shapefile, filtering for just the NC features 
 counties_sf<- st_read('./Data/Spatial/cb_2018_us_county_20m.shp') %>% 
   filter(STATEFP == 37) #Filter for just NC Counties
 
+mapview(counties_sf)
 #
 colnames(counties_sf)
 
@@ -189,8 +192,8 @@ nc_powerplants_sf <- nc_powerplants_sf %>%
   filter(TYPE != "SOLAR PHOTOVOLTAIC")
 
 # Examine counts by fuel type
-ggplot(nc_powerplants_sf) + 
-  geom_sf(aes(color = PRIM_FUEL)) 
+  `ggplot(nc_powerplants_sf) + 
+    geom_sf(aes(color = PRIM_FUEL))` 
 
 ```
 
