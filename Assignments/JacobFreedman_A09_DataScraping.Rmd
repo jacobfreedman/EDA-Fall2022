@@ -58,7 +58,7 @@ DurhamWaterWebpage
 
 * From the "1. System Information" section:
  * Water system name
- * PSWID
+ * PWSID
  * Ownership
  
 * From the "3. Water Supply Sources" section:
@@ -70,25 +70,25 @@ In the code chunk below scrape these values, assigning them to four separate var
 
 ```{r scrape.the.data}
 #3
-water.system.name <- DurhamWaterWebpage %>% 
+water_system_name <- DurhamWaterWebpage %>% 
   html_nodes("div+ table tr:nth-child(1) td:nth-child(2)") %>% 
   html_text()
-water.system.name
+water_system_name
 
-pswid <- DurhamWaterWebpage %>% 
+pwsid <- DurhamWaterWebpage %>% 
   html_nodes("td tr:nth-child(1) td:nth-child(5)") %>% 
   html_text()
-pswid
+pwsid
   
 ownership <- DurhamWaterWebpage %>% 
   html_nodes("div+ table tr:nth-child(2) td:nth-child(4)") %>% 
   html_text()
 ownership
   
-max.withdrawals.mgd <- DurhamWaterWebpage %>% 
+max_withdrawals_mgd <- DurhamWaterWebpage %>% 
   html_nodes("th~ td+ td") %>% 
   html_text()
-max.withdrawals.mgd
+max_withdrawals_mgd
 
 ```
 
@@ -106,12 +106,12 @@ max.withdrawals.mgd
 df_max_withdrawals <- data.frame("Month_abbr" = c("Jan", "May", "Sep", "Feb", "Jun", "Oct", "Mar", "July", "Nov", "Apr", "Aug", "Dec"),
                              "Month" = c(1,5,9,2,6,10,3,7,11,4,8,12),
                              "Year" = rep(2021,12),
-                             "Max_withdrawals_mgd" = as.numeric(max.withdrawals.mgd))
+                             "Max_withdrawals_mgd" = as.numeric(max_withdrawals_mgd))
 
 df_max_withdrawals <- df_max_withdrawals %>% 
   mutate(Ownership = !!ownership,
-         PSWID = !!pswid,
-         Water_System = !!water.system.name,
+         PWSID = !!pwsid,
+         Water_System = !!water_system_name,
          Date = my(paste(Month,"-",Year))) %>%
          arrange(Month)
 
@@ -129,43 +129,47 @@ print(Max_withdrawl_plot)
 
 ```{r construct.a.scraping.function}
 #6.
+the_base_url <- 'https://www.ncwater.org/WUDC/app/LWSP/report.php'
+pwsid <- '03-32-010'
+the_year <- 2019
+Scrape_url <- paste0(the_base_url, '?pwsid=', pwsid, '&year=', the_year)
+print(Scrape_url)
 
-Scrape_function <- function(the_year, PWSID){
-  The_website <- read_html(paste0('https://www.ncwater.org/WUDC/app/LWSP/report.php', '?pwsid=', PWSID, '&year=', the_year))
+#Retrieve the website contents 
+the_website <- read_html(Scrape_url)
 
-water_system_tag <- "div+ table tr:nth-child(1) td:nth-child(2)"
-PWSID_tag <- "td tr:nth-child(1) td:nth-child(5)"
-Ownership_tag <- "div+ table tr:nth-child(2) td:nth-child(4)"
-Max_withdrawal_tag <- "th~ td+ td"
+Scrape_function <- function(the_year, pwsid){
+  
+  The_website <- read_html(paste0('https://www.ncwater.org/WUDC/app/LWSP/report.php', '?pwsid=', pwsid, '&year=', the_year))
 
-water_system_name <- The_website %>% html_nodes(water_system_tag) %>% html_text()
-PWSID <- The_website %>% html_nodes(PWSID_tag) %>%  html_text()
-Ownership <- The_website %>% html_nodes(Ownership_tag) %>% html_text()
-Max_withdrawals <- The_website %>% html_nodes(Max_withdrawal_tag) %>% html_text()
+  water_system_tag <- "div+ table tr:nth-child(1) td:nth-child(2)"
+  PWSID_tag <- "td tr:nth-child(1) td:nth-child(5)"
+  Ownership_tag <- "div+ table tr:nth-child(2) td:nth-child(4)"
+  Max_withdrawal_tag <- "th~ td+ td"
 
-df_max_withdrawals <- data.frame("Month_abbr" = c("Jan", "May", "Sep", "Feb", "Jun", "Oct", "Mar", "July", "Nov", "Apr", "Aug", "Dec"),
+  water_system_name <- The_website %>% html_nodes(water_system_tag) %>% html_text()
+  pwsid <- The_website %>% html_nodes(PWSID_tag) %>%  html_text()
+  ownership <- The_website %>% html_nodes(Ownership_tag) %>% html_text()
+  max_withdrawals_mgd <- The_website %>% html_nodes(Max_withdrawal_tag) %>% html_text()
+
+  df_max_withdrawals <- data.frame("Month_abbr" = c("Jan", "May", "Sep", "Feb", "Jun", "Oct", "Mar", "July", "Nov", "Apr", "Aug", "Dec"),
                              "Month" = c(1,5,9,2,6,10,3,7,11,4,8,12),
                              "Year" = rep(the_year,12),
-                             "Max_withdrawals_mgd" = as.numeric(Max_withdrawals))
+                             "Max_withdrawals_mgd" = as.numeric(max_withdrawals_mgd))
 
-df_max_withdrawals <- df_max_withdrawals %>% 
+  df_max_withdrawals <- df_max_withdrawals %>% 
   mutate(Ownership = !!ownership,
-         PSWID = !!pswid,
-         Water_System = !!water.system.name,
+         PWSID = !!pwsid,
+         Water_System = !!water_system_name,
          Date = my(paste(Month,"-",Year))) %>%
          arrange(Month)
 
-Max_withdrawl_plot <- ggplot(df_max_withdrawals,aes(x=Date, y=Max_withdrawals_mgd)) +
-  geom_line() +
-  theme1 +
-  ylab("Maximum Monthly Withdrawal")
-print(Max_withdrawl_plot)
+  
+  Sys.sleep(1)
 
-  #return(df_max_withdrawals)
+ return(df_max_withdrawals)
 }
 
-#Testing the function
-Scraped_df <- Scrape_function(2018, '032-32-010')
 
 ```
 
@@ -187,11 +191,11 @@ Scraped_df_Durham <- Scrape_function(2015,'03-32-010')
 
 Asheville_Durham_combined <- rbind(Scraped_df_Asheville, Scraped_df_Durham)
 
-Withdrawl_plot_comparison <- ggplot(Asheville_Durham_combined,aes(x=Date, y=Max_withdrawals_mgd)) +
-  geom_line(color = ) +
+Withdrawl_plot_comparison <- ggplot(Asheville_Durham_combined,aes(x=Date, y=Max_withdrawals_mgd, color=Water_System)) +
+  geom_line() +
   theme1 +
   ylab("Maximum Monthly Withdrawal")
-print(Max_withdrawl_plot)
+print(Withdrawl_plot_comparison)
 ```
 
 
@@ -202,7 +206,39 @@ print(Max_withdrawl_plot)
 ```{r fetch.and.plot.Asheville.multiyear.data}
 #9
 
+Years2010to2019 <- c(2010:2019)
+pwsidlist <- rep("01-011-010",10)
+
+#"Map" the "scrape.it" function to retrieve data for all these
+dfs_Asheville_2010to2019 <- map2(Years2010to2019, pwsidlist, Scrape_function) 
+
+#Conflate the returned list of dataframes into a single one
+dfs_combined_Asheville_2010to2019 <- rbind(dfs_Asheville_2010to2019)
+
+Scraped_df_Asheville_2010 <- Scrape_function(2010,'01-11-010')
+Scraped_df_Asheville_2011 <- Scrape_function(2011,'01-11-010')
+Scraped_df_Asheville_2012 <- Scrape_function(2012,'01-11-010')
+Scraped_df_Asheville_2013 <- Scrape_function(2013,'01-11-010')
+Scraped_df_Asheville_2014 <- Scrape_function(2014,'01-11-010')
+Scraped_df_Asheville_2015 <- Scrape_function(2015,'01-11-010')
+Scraped_df_Asheville_2016 <- Scrape_function(2016,'01-11-010')
+Scraped_df_Asheville_2017 <- Scrape_function(2017,'01-11-010')
+Scraped_df_Asheville_2018 <- Scrape_function(2018,'01-11-010')
+Scraped_df_Asheville_2019 <- Scrape_function(2019,'01-11-010')
+
+Scraped_df_Asheville_2010to2019 <- rbind(Scraped_df_Asheville_2010, Scraped_df_Asheville_2011, Scraped_df_Asheville_2012, Scraped_df_Asheville_2013, Scraped_df_Asheville_2014, Scraped_df_Asheville_2015, Scraped_df_Asheville_2016, Scraped_df_Asheville_2017, Scraped_df_Asheville_2018, Scraped_df_Asheville_2019)
+
+view(Scraped_df_Asheville_2010to2019)
+
+Asheville_2010to2019_plot <- ggplot(Scraped_df_Asheville_2010to2019,aes(x=Date, y=Max_withdrawals_mgd)) +
+  geom_smooth() +
+  geom_line() +
+  theme1 +
+  ylab("Maximum Monthly Withdrawal")
+print(Asheville_2010to2019_plot)
 
 ```
 
 >Question: Just by looking at the plot (i.e. not running statistics), does Asheville have a trend in water usage over time?
+
+The maximum monthly water usage in Asheville appears stable from 2010 - 2017, but jumps dramatically in 2018 and 2019. Perhaps 2018 and 2019 were particularly dry years for the region and the city required more water use to meet constituents' needs. 
