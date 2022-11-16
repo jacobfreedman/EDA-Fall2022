@@ -26,6 +26,15 @@ This exercise accompanies the lessons in Environmental Data Analytics on data sc
 * Load the packages `tidyverse`, `rvest`, and any others you end up using.
 * Set your ggplot theme
 
+```{r setup, include=FALSE}
+#This code chunk will tidy your knit PDF files, wrapping long code lines
+#For it to work, the "formatR" package needs to be installed
+
+#install.packages('formatR')
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=80), tidy=TRUE)
+```
+
+
 ```{r, message = FALSE}
 #1
 setwd("~/R/EDA-Fall2022")
@@ -49,7 +58,8 @@ Indicate this website as the as the URL to be scraped. (In other words, read the
 
 ```{r set.the.scraping.website}
 #2
-DurhamWaterWebpage <- read_html('https://www.ncwater.org/WUDC/app/LWSP/report.php?pwsid=03-32-010&year=2021')
+DurhamWaterWebpage <- 
+read_html('https://www.ncwater.org/WUDC/app/LWSP/report.php?pwsid=03-32-010&year=2021')
 DurhamWaterWebpage
 
 ```
@@ -116,11 +126,11 @@ df_max_withdrawals <- df_max_withdrawals %>%
          arrange(Month)
 
 #5
-Max_withdrawl_plot <- ggplot(df_max_withdrawals,aes(x=Date, y=Max_withdrawals_mgd)) +
+Max_withdrawal_plot <- ggplot(df_max_withdrawals,aes(x=Date, y=Max_withdrawals_mgd)) +
   geom_line() +
   theme1 +
   ylab("Maximum Monthly Withdrawl")
-print(Max_withdrawl_plot)
+print(Max_withdrawal_plot)
 
 
 ```
@@ -135,12 +145,12 @@ the_year <- 2019
 Scrape_url <- paste0(the_base_url, '?pwsid=', pwsid, '&year=', the_year)
 print(Scrape_url)
 
-#Retrieve the website contents 
 the_website <- read_html(Scrape_url)
 
 Scrape_function <- function(the_year, pwsid){
   
-  The_website <- read_html(paste0('https://www.ncwater.org/WUDC/app/LWSP/report.php', '?pwsid=', pwsid, '&year=', the_year))
+  The_website <- read_html(paste0('https://www.ncwater.org/WUDC/app/LWSP/report.php', 
+                                  '?pwsid=', pwsid, '&year=', the_year))
 
   water_system_tag <- "div+ table tr:nth-child(1) td:nth-child(2)"
   PWSID_tag <- "td tr:nth-child(1) td:nth-child(5)"
@@ -152,7 +162,8 @@ Scrape_function <- function(the_year, pwsid){
   ownership <- The_website %>% html_nodes(Ownership_tag) %>% html_text()
   max_withdrawals_mgd <- The_website %>% html_nodes(Max_withdrawal_tag) %>% html_text()
 
-  df_max_withdrawals <- data.frame("Month_abbr" = c("Jan", "May", "Sep", "Feb", "Jun", "Oct", "Mar", "July", "Nov", "Apr", "Aug", "Dec"),
+  df_max_withdrawals <- data.frame("Month_abbr" = c("Jan", "May", "Sep", "Feb", "Jun", "Oct", "Mar", 
+                                                    "July", "Nov", "Apr", "Aug", "Dec"),
                              "Month" = c(1,5,9,2,6,10,3,7,11,4,8,12),
                              "Year" = rep(the_year,12),
                              "Max_withdrawals_mgd" = as.numeric(max_withdrawals_mgd))
@@ -178,7 +189,13 @@ Scrape_function <- function(the_year, pwsid){
 ```{r fetch.and.plot.Durham.2015.data}
 #7
 Scraped_df <- Scrape_function(2015,'03-32-010')
-view(Scraped_df)
+head(Scraped_df)
+
+Max_withdrawal_2015 <- ggplot(df_max_withdrawals,aes(x=Date, y=Max_withdrawals_mgd)) +
+  geom_line() +
+  theme1 +
+  ylab("Maximum Monthly Withdrawl")
+print(Max_withdrawal_2015)
 
 ```
 
@@ -191,11 +208,11 @@ Scraped_df_Durham <- Scrape_function(2015,'03-32-010')
 
 Asheville_Durham_combined <- rbind(Scraped_df_Asheville, Scraped_df_Durham)
 
-Withdrawl_plot_comparison <- ggplot(Asheville_Durham_combined,aes(x=Date, y=Max_withdrawals_mgd, color=Water_System)) +
+Withdrawal_plot_comparison <- ggplot(Asheville_Durham_combined,aes(x=Date, y=Max_withdrawals_mgd, color=Water_System)) +
   geom_line() +
   theme1 +
   ylab("Maximum Monthly Withdrawal")
-print(Withdrawl_plot_comparison)
+print(Withdrawal_plot_comparison)
 ```
 
 
@@ -206,31 +223,13 @@ print(Withdrawl_plot_comparison)
 ```{r fetch.and.plot.Asheville.multiyear.data}
 #9
 
-Years2010to2019 <- c(2010:2019)
-pwsidlist <- rep("01-011-010",10)
+dfs_Asheville_2010to2019 <- map2(seq(2010,2019), rep("01-11-010",10), Scrape_function)
+  
+Combined_Asheville_2010to2019 <- bind_rows(dfs_Asheville_2010to2019)
 
-#"Map" the "scrape.it" function to retrieve data for all these
-dfs_Asheville_2010to2019 <- map2(Years2010to2019, pwsidlist, Scrape_function) 
 
-#Conflate the returned list of dataframes into a single one
-dfs_combined_Asheville_2010to2019 <- rbind(dfs_Asheville_2010to2019)
-
-Scraped_df_Asheville_2010 <- Scrape_function(2010,'01-11-010')
-Scraped_df_Asheville_2011 <- Scrape_function(2011,'01-11-010')
-Scraped_df_Asheville_2012 <- Scrape_function(2012,'01-11-010')
-Scraped_df_Asheville_2013 <- Scrape_function(2013,'01-11-010')
-Scraped_df_Asheville_2014 <- Scrape_function(2014,'01-11-010')
-Scraped_df_Asheville_2015 <- Scrape_function(2015,'01-11-010')
-Scraped_df_Asheville_2016 <- Scrape_function(2016,'01-11-010')
-Scraped_df_Asheville_2017 <- Scrape_function(2017,'01-11-010')
-Scraped_df_Asheville_2018 <- Scrape_function(2018,'01-11-010')
-Scraped_df_Asheville_2019 <- Scrape_function(2019,'01-11-010')
-
-Scraped_df_Asheville_2010to2019 <- rbind(Scraped_df_Asheville_2010, Scraped_df_Asheville_2011, Scraped_df_Asheville_2012, Scraped_df_Asheville_2013, Scraped_df_Asheville_2014, Scraped_df_Asheville_2015, Scraped_df_Asheville_2016, Scraped_df_Asheville_2017, Scraped_df_Asheville_2018, Scraped_df_Asheville_2019)
-
-view(Scraped_df_Asheville_2010to2019)
-
-Asheville_2010to2019_plot <- ggplot(Scraped_df_Asheville_2010to2019,aes(x=Date, y=Max_withdrawals_mgd)) +
+Asheville_2010to2019_plot <- ggplot(Combined_Asheville_2010to2019,aes(x=Date, 
+                                                      y=Max_withdrawals_mgd)) +
   geom_smooth() +
   geom_line() +
   theme1 +
